@@ -26,10 +26,7 @@
 package me.lucko.networkanalytics;
 
 import me.lucko.helper.metadata.MetadataKey;
-import me.lucko.networkanalytics.channel.AnalyticsData;
 import me.lucko.networkanalytics.data.DataManager;
-
-import protocolsupport.api.ProtocolVersion;
 
 import java.util.Map;
 
@@ -37,15 +34,11 @@ public interface NetworkAnalytics {
 
     MetadataKey<Long> CONNECTION_TIME_SECONDS = MetadataKey.createLongKey("na-login-time");
 
-    MetadataKey<ProtocolVersion> PROTOCOL_VERSION = MetadataKey.create("p-ver", ProtocolVersion.class);
-
     /**
      * Gets the analytics data manager.
      *
      * @return the data manager
      */
     DataManager getDataManager();
-
-    Map<String, AnalyticsData> getAnalyticsDataMap();
 
 }

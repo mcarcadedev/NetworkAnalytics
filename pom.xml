@@ -29,61 +29,41 @@
         </resources>
     </build>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>luck-snapshots</id>
-            <url>https://nexus.lucko.me/repository/maven-snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>luck-releases</id>
-            <url>https://nexus.lucko.me/repository/maven-releases/</url>
-        </repository>
-    </distributionManagement>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.destroystokyo.paper</groupId>
-            <artifactId>paper-server</artifactId>
-            <version>1.12.1-R0.1</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.lucko</groupId>
-            <artifactId>helper</artifactId>
-            <version>5.0.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.lucko</groupId>
-            <artifactId>helper-sql</artifactId>
-            <version>1.1.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.lucko</groupId>
-            <artifactId>helper-redis</artifactId>
-            <version>1.1.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.github.protocolsupport</groupId>
-            <artifactId>protocolsupport</artifactId>
-            <version>4.27-dev</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.16.10</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
-
     <repositories>
         <repository>
             <id>luck-repo</id>
             <url>https://repo.lucko.me/</url>
         </repository>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
     </repositories>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.18.2-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>me.lucko</groupId>
+            <artifactId>helper</artifactId>
+            <version>5.6.10</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>me.lucko</groupId>
+            <artifactId>helper-sql</artifactId>
+            <version>1.3.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>

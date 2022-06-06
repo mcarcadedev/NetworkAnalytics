@@ -27,54 +27,23 @@ package me.lucko.networkanalytics;
 
 import lombok.Getter;
 
-import me.lucko.helper.Commands;
-import me.lucko.helper.Schedulers;
-import me.lucko.helper.messaging.Channel;
-import me.lucko.helper.messaging.ChannelAgent;
 import me.lucko.helper.messaging.InstanceData;
-import me.lucko.helper.metadata.Metadata;
 import me.lucko.helper.plugin.ExtendedJavaPlugin;
-import me.lucko.helper.plugin.ap.Plugin;
-import me.lucko.helper.redis.HelperRedis;
-import me.lucko.helper.sql.HelperDataSource;
-import me.lucko.helper.utils.Players;
-import me.lucko.networkanalytics.channel.AnalyticsData;
-import me.lucko.networkanalytics.channel.OnlinePlayerRecord;
+import me.lucko.helper.sql.Sql;
 import me.lucko.networkanalytics.data.DataManager;
 import me.lucko.networkanalytics.handler.AnalyticsCommand;
 import me.lucko.networkanalytics.handler.AnalyticsListener;
 
-import protocolsupport.api.ProtocolVersion;
-
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nonnull;
-
-@Plugin(
-        name = "NetworkAnalytics",
-        hardDepends = {
-                "helper",
-                "helper-sql",
-                "helper-redis",
-                "ProtocolSupport"
-        }
-)
 public class AnalyticsPlugin extends ExtendedJavaPlugin implements NetworkAnalytics {
 
     private InstanceData instanceData;
 
     @Getter
     private DataManager dataManager;
-
-    @Getter
-    private Map<String, AnalyticsData> analyticsDataMap = new ConcurrentHashMap<>();
-
-    private Channel<AnalyticsData> analyticsChannel;
 
     @Override
     public void enable() {
@@ -99,7 +68,7 @@ public class AnalyticsPlugin extends ExtendedJavaPlugin implements NetworkAnalyt
         }
 
         // get sql source
-        HelperDataSource sql = getService(HelperDataSource.class);
+        Sql sql = getService(Sql.class);
 
         // init data manager
         dataManager = new DataManager(this, sql);
@@ -107,91 +76,13 @@ public class AnalyticsPlugin extends ExtendedJavaPlugin implements NetworkAnalyt
 
         bindModule(new AnalyticsListener(this));
 
-        // get messaging channels
-        HelperRedis redis = getService(HelperRedis.class);
-        analyticsChannel = redis.getChannel("na-data", AnalyticsData.class);
-
-        // send monitoring data periodically
-        Schedulers.sync().runRepeating(() -> {
-            AnalyticsData data = formData();
-            analyticsChannel.sendMessage(data);
-        }, 70L, 90L).bindWith(this);
-
-        // listen for analytics data
-        ChannelAgent<AnalyticsData> analyticsChannelAgent = analyticsChannel.newAgent();
-        analyticsChannelAgent.bindWith(this);
-        analyticsChannelAgent.addListener((agent, message) -> analyticsDataMap.put(message.getServerId(), message));
-
-        // cleanup old analytics data
-        Schedulers.async().runRepeating(() -> {
-            long expiry = (System.currentTimeMillis() / 1000L) - 20;
-            analyticsDataMap.values().removeIf(data -> data.getTimeSent() < expiry);
-        }, 35L, 40L);
-
         registerCommand(new AnalyticsCommand(this), "analytics");
-
-        Commands.create()
-                .assertPermission("networkanalytics.playerversion")
-                .assertUsage("<player>")
-                .handler(c -> {
-                    String player = c.rawArg(0);
-                    Schedulers.async().run(() -> {
-                        OnlinePlayerRecord record = null;
-
-                        search:
-                        for (AnalyticsData data : analyticsDataMap.values()) {
-                            for (OnlinePlayerRecord r : data.getPlayers()) {
-                                if (r.getUsername().equalsIgnoreCase(player) || r.getUuid().toString().equalsIgnoreCase(player)) {
-                                    record = r;
-                                    break search;
-                                }
-                            }
-                        }
-
-                        if (record == null) {
-                            Players.msg(c.sender(), "&3[ANALYTICS] &fNo player found with the username/uuid '" + player + "'");
-                            return;
-                        }
-
-                        Players.msg(c.sender(), "&3[ANALYTICS] &fPlayer &b" + record.getUsername() + " &fis playing on version &b" + getProtocolName(record.getVersion().orElse(null)) + "&f.");
-                    });
-                })
-                .register("playerversion");
 
         provideService(NetworkAnalytics.class, this);
     }
 
-    private AnalyticsData formData() {
-        String serverId = instanceData.getId();
-        long time = System.currentTimeMillis() / 1000L;
-
-        List<OnlinePlayerRecord> records = new ArrayList<>();
-        Players.forEach(p -> {
-            ProtocolVersion version = Metadata.provideForPlayer(p).getOrNull(NetworkAnalytics.PROTOCOL_VERSION);
-            String locale = p.getLocale();
-            if (locale == null || locale.equals("null")) {
-                locale = "undisclosed";
-            }
-            records.add(new OnlinePlayerRecord(p.getUniqueId(), p.getName(), version, locale.toLowerCase()));
-        });
-
-        return new AnalyticsData(serverId, time, records);
-    }
-
     public String getInstanceId() {
         return instanceData.getId();
-    }
-
-    public static String getProtocolName(ProtocolVersion version) {
-        if (version != null) {
-            String name = version.getName();
-            if (name != null) {
-                return name;
-            } else {
-                return version.name();
-            }
-        }
-        return "Unknown";
     }
 
 }

@@ -28,7 +28,7 @@ package me.lucko.networkanalytics.data;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.helper.Schedulers;
-import me.lucko.helper.sql.HelperDataSource;
+import me.lucko.helper.sql.Sql;
 import me.lucko.networkanalytics.AnalyticsPlugin;
 
 import java.sql.Connection;
@@ -50,7 +50,7 @@ public class DataManager {
     private static final String SELECT_USERNAME = "SELECT username FROM analytics_data WHERE uuid=?";
 
     private final AnalyticsPlugin plugin;
-    private final HelperDataSource sql;
+    private final Sql sql;
 
     public void init() {
         try (Connection c = sql.getConnection()) {

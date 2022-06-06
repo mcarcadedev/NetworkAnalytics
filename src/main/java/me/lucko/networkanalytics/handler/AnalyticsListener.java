@@ -35,12 +35,8 @@ import me.lucko.networkanalytics.AnalyticsPlugin;
 import me.lucko.networkanalytics.NetworkAnalytics;
 
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-
-import protocolsupport.api.ProtocolSupportAPI;
-import protocolsupport.api.ProtocolVersion;
 
 import java.util.concurrent.TimeUnit;
 
@@ -57,15 +53,6 @@ public class AnalyticsListener implements TerminableModule {
                 .handler(e -> {
                     plugin.getDataManager().logPlayer(e.getPlayer().getUniqueId(), e.getPlayer().getName());
                     Metadata.provideForPlayer(e.getPlayer()).put(NetworkAnalytics.CONNECTION_TIME_SECONDS, (System.currentTimeMillis() / 1000L));
-                })
-                .bindWith(consumer);
-
-        Events.subscribe(PlayerJoinEvent.class, EventPriority.MONITOR)
-                .handler(e -> {
-                    ProtocolVersion protocolVersion = ProtocolSupportAPI.getProtocolVersion(e.getPlayer());
-                    if (protocolVersion != null) {
-                        Metadata.provideForPlayer(e.getPlayer()).put(NetworkAnalytics.PROTOCOL_VERSION, protocolVersion);
-                    }
                 })
                 .bindWith(consumer);
 
