@@ -27,6 +27,7 @@ package me.lucko.networkanalytics;
 
 import lombok.Getter;
 
+import me.lucko.helper.Services;
 import me.lucko.helper.messaging.InstanceData;
 import me.lucko.helper.plugin.ExtendedJavaPlugin;
 import me.lucko.helper.sql.Sql;
@@ -49,10 +50,10 @@ public class AnalyticsPlugin extends ExtendedJavaPlugin implements NetworkAnalyt
     public void enable() {
 
         // get instance data
-        instanceData = getService(InstanceData.class);
-        if (instanceData == null) {
+        instanceData = Services.get(InstanceData.class).orElseGet(() -> {
             String name = loadConfig("config.yml").getString("server-id", "null");
-            instanceData = new InstanceData() {
+
+            return new InstanceData() {
                 @Nonnull
                 @Override
                 public String getId() {
@@ -65,7 +66,7 @@ public class AnalyticsPlugin extends ExtendedJavaPlugin implements NetworkAnalyt
                     return Collections.emptySet();
                 }
             };
-        }
+        });
 
         // get sql source
         Sql sql = getService(Sql.class);
