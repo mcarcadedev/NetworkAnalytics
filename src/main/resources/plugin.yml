@@ -2,6 +2,6 @@ name: NetworkAnalytics
 author: Luck
 version: ${project.version}
 description: A network analytics plugin
-main: me.lucko.networkanalytics.AnalyticsPlugins
+main: me.lucko.networkanalytics.AnalyticsPlugin
 depend: [helper, helper-sql]
 api-version: 1.13
